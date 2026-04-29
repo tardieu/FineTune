@@ -1,6 +1,7 @@
 // FineTune/Audio/Keys/MediaKeyMonitor.swift
 import AppKit
 import AudioToolbox
+import AVFoundation
 import CoreGraphics
 import os
 
@@ -18,6 +19,7 @@ final class MediaKeyMonitor {
     private let popupVisibility: PopupVisibilityService
     private let mediaKeyStatus: MediaKeyStatus
     private let logger = Logger(subsystem: "com.finetuneapp.FineTune", category: "MediaKeyMonitor")
+    private var audioPlayer: AVAudioPlayer?
 
     /// Step size applied per keypress (1/16 matches Apple's default cadence).
     private let volumeStep: Float = 1.0 / 16.0
@@ -258,6 +260,12 @@ final class MediaKeyMonitor {
             if shouldShowHUD {
                 hudController.show(volume: newVolume, mute: false, deviceName: deviceName)
             }
+            do {
+                self.audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: "/System/Library/LoginPlugins/BezelServices.loginPlugin/Contents/Resources/volume.aiff"))
+                self.audioPlayer?.play()
+            } catch {
+                logger.debug("\(error.localizedDescription)")
+            }
             iconCoordinator?.flashDevice()
 
         case .volumeDown(let isRepeat):
@@ -276,6 +284,12 @@ final class MediaKeyMonitor {
             setVolume(deviceID, newVolume)
             if shouldShowHUD {
                 hudController.show(volume: newVolume, mute: willBeSilent, deviceName: deviceName)
+            }
+            do {
+                self.audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: "/System/Library/LoginPlugins/BezelServices.loginPlugin/Contents/Resources/volume.aiff"))
+                self.audioPlayer?.play()
+            } catch {
+                logger.debug("\(error.localizedDescription)")
             }
             iconCoordinator?.flashDevice()
 
